@@ -1,0 +1,9 @@
+{% if livresList %}
+    <ul>
+    {% for livre in livresList %}
+        <li><a href="/polls/{{ livre.id }}/">{{ livre.titre }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No polls are available.</p>
+{% endif %}
