@@ -6,7 +6,7 @@ from django.shortcuts import render
 from .models import Livre
 
 
-def index(request):
+def home(request):
     livresList = Livre.objects.order_by('-titre')[:1]
     template = loader.get_template('polls/index.html')
     context = {
