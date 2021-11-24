@@ -1,5 +1,11 @@
+{% if livre %}
 <h1>{{ livre.titre }}</h1>
-<h2>{{ livre.nomAuteur }} 
-</h2>
-<h2>{{ livre.prenomAuteur }} 
-</h2>
+<div>
+    <h2>{{ livre.prenomAuteur }}
+    </h2>
+    <h2>{{ livre.nomAuteur }}
+    </h2>
+</div>
+{% else %}
+<p>Aucun livre dans la bibliothèque</p>
+{% endif %}

@@ -1,0 +1,14 @@
+<h1>Catalogue</h1>
+<h2>Accès à la documentation</h2>
+
+{% include 'polls/search.html' %} {% if livre %}
+<ul>{{livre}}</ul>
+{% endif %} {% if livresList %}
+<ul>
+    {% for livre in livresList %}
+    <li><a href="/polls/{{ livre.id }}/">{{ livre.titre }}</a></li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>Il n'y pas de livres dans cette bibliothèque.</p>
+{% endif %}

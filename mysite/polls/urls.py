@@ -3,7 +3,12 @@ from django.http import HttpResponse
 
 from . import views
 
+app_name = 'polls'
+
 urlpatterns = [
     path('', views.home, name='home'),
-    path('<int:livre_id>/', views.detailLivre, name='detail'),
+    path('catalogue/', views.catalogue, name='catalogue'),
+    path('moncompte/', views.moncompte, name='moncompte'),
+    path('search/', views.search, name='search'),
+    path('<int:pk>/', views.detail, name="detail"),
 ]
