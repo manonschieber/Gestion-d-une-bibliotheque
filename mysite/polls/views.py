@@ -1,10 +1,10 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.http import Http404
 from django.shortcuts import render
 
 from .models import Livre
-
+from .forms import NameForm
 
 def home(request):
     return render(request, 'polls/home.html')
@@ -39,4 +39,19 @@ def detail(request, pk):
     except Livre.DoesNotExist:
         raise Http404("Le livre n'existe pas")
     return render(request, 'polls/detailLivre.html', {'livre': livre})
+
+def index(request):
+    livres = Livre.objects.order_by('-titre')
+    context = {
+        'livres': livres
+    }
+    return render(request, 'polls/index.html', context)
+
+def listing(request):
+    livres = Livre.objects.order_by('-titre')
+    context = {
+        'livres': livres
+    }
+    return render(request, 'polls/listing.html', context)
+
 

@@ -1,14 +1,19 @@
 <h1>Catalogue</h1>
 <h2>Accès à la documentation</h2>
 
-{% include 'polls/search.html' %} {% if livre %}
-<ul>{{livre}}</ul>
-{% endif %} {% if livresList %}
-<ul>
-    {% for livre in livresList %}
-    <li><a href="/polls/{{ livre.id }}/">{{ livre.titre }}</a></li>
+{% include 'polls/search_form.html' %} 
+
+{% if albums|length_is:"0" %}
+<div class="text-center">
+    Palsambleu ! Nous n'avons trouvé aucun résultat à cette requête. Même pas de quoi se ronger la chique !
+    Partez de nouveau à l'abordage !
+  </div>
+
+  {% else %}
+    {% for livre in livres %}
+        <div class="col-sm-4 text-center">
+            <h3>{{livre}}</h3>
+        </div>
     {% endfor %}
-</ul>
-{% else %}
-<p>Il n'y pas de livres dans cette bibliothèque.</p>
-{% endif %}
+
+  {% endif %}
