@@ -54,4 +54,14 @@ def listing(request):
     }
     return render(request, 'polls/listing.html', context)
 
+def mesreservations(request):
+    context = {
+    }
+    return render(request, 'polls/mesreservations.html', context)
+
+def infos(request):
+    context = {
+    }
+    return render(request, 'polls/infos.html', context)
+
 

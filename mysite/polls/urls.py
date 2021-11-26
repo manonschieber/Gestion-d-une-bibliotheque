@@ -11,6 +11,8 @@ urlpatterns = [
     url(r'^$', views.listing, name='listing'),
     path('catalogue/', views.catalogue, name='catalogue'),
     path('moncompte/', views.moncompte, name='moncompte'),
+    path('mesreservations/', views.mesreservations, name='mesreservations'),
+    path('infos/', views.infos, name='infos'),
     url(r'^search/$', views.search, name='search'),
     path('<int:pk>/', views.detail, name="detail"),
 ]
