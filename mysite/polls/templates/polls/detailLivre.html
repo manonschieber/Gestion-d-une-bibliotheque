@@ -1,11 +1,31 @@
-{% if livre %}
-<h1>{{ livre.titre }}</h1>
-<div>
-    <h2>{{ livre.prenomAuteur }}
-    </h2>
-    <h2>{{ livre.nomAuteur }}
-    </h2>
+{% extends 'polls/base.html' %}
+
+{% block content %}
+<h1 class="intro-text text-center">{{ livre_titre }}</h1>
+<div class="col-md-6">
+  <img src="" alt="{{ livre_titre }}" class="img-responsive">
 </div>
-{% else %}
-<p>Aucun livre dans la bibliothèque</p>
-{% endif %}
+<div class="col-md-6">
+  <div style="margin-bottom:45px">
+    <h2 class="text-center livre_nomAuteur">{{ livre_nomAuteur }}  {{ livre_prenomAuteur }}</h2>
+  </div>
+
+  <h2 class="text-center artist_name">Réserver {{ livre_titre }}</h2>
+  <p style="margin-bottom: 20px;">Demandez-nous de mettre de côté {{ livre_titre }} et venez le chercher dès demain à la bilbiothèque ! </p>
+  <form class="form-inline" action="/" method="post">
+    <div class="form-group">
+        <label for="name" class="control-label">Nom</label>
+        <input type="text" name="name" value="" id="name">
+        {% csrf_token %}
+      </div>
+    <div class="form-group">
+      <label for="surname" class="control-label">Prénom</label>
+      <input type="text" name="name" value="" id="name">
+    </div>
+    <button type="submit" class="btn btn-success">Réserver</button>
+  </form>
+
+</div>
+
+
+{% endblock %}

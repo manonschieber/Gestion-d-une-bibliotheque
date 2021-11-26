@@ -12,7 +12,9 @@ urlpatterns = [
     path('catalogue/', views.catalogue, name='catalogue'),
     path('moncompte/', views.moncompte, name='moncompte'),
     path('mesreservations/', views.mesreservations, name='mesreservations'),
+    path('mesemprunts/', views.mesemprunts, name='mesemprunts'),
     path('infos/', views.infos, name='infos'),
     url(r'^search/$', views.search, name='search'),
     path('<int:pk>/', views.detail, name="detail"),
+    path('your-name/', views.get_name, name="get_name"),
 ]
