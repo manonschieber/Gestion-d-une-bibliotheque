@@ -8,9 +8,9 @@ app_name = 'polls'
 
 urlpatterns = [
     path('', views.home, name='home'),
-    path('', views.listing, name='listing'),
+    url(r'^$', views.listing, name='listing'),
     path('catalogue/', views.catalogue, name='catalogue'),
     path('moncompte/', views.moncompte, name='moncompte'),
-    path('search/', views.search, name='search'),
+    url(r'^search/$', views.search, name='search'),
     path('<int:pk>/', views.detail, name="detail"),
 ]

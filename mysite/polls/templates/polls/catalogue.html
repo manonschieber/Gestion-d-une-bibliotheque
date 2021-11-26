@@ -1,8 +1,8 @@
-<h1>Catalogue</h1>
-<h2>Accès à la documentation</h2>
+{% extends 'polls/base.html' %}
+
+{% block content %}
 
 {% include 'polls/search_form.html' %} 
-
 {% if albums|length_is:"0" %}
 <div class="text-center">
     Palsambleu ! Nous n'avons trouvé aucun résultat à cette requête. Même pas de quoi se ronger la chique !
@@ -17,3 +17,6 @@
     {% endfor %}
 
   {% endif %}
+
+{% endblock %}
+
