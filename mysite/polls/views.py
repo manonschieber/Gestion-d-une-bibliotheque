@@ -2,6 +2,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.http import Http404
 from django.shortcuts import render
+from django.contrib.auth import *
+from django.views.generic import TemplateView
 
 from .models import Livre
 from .forms import NameForm
@@ -17,7 +19,10 @@ def catalogue(request):
     return render(request, 'polls/catalogue.html', context)
 
 def moncompte(request):
-    return render(request, 'polls/moncompte.html')
+ #   return render(request, 'polls/moncompte.html')
+    return HttpResponseRedirect('/polls/login')
+
+
 
 def search(request):
     query = request.GET.get('query')
@@ -79,3 +84,7 @@ def get_name(request):
     else:
         form = NameForm()
     return render(request, 'polls/name.html', {'form': form})
+
+
+class DashboardView(TemplateView):
+    template_name = "polls/dashboard.html"

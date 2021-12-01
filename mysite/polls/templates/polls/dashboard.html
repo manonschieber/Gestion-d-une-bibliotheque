@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang='fr'>
+    <head>
+        <meta charset = "UTF-8">
+        <title>Dashboard</title>
+    </head>
+</html>
+
+<body>
+    {% if request.user.is_authenticated %}
+        <p>Salut {{request.user}}  </p>
+        <a href="{% url 'polls:logout' %}">Logout</a>
+
+    {% else %}
+        <p>Salut anonyme</p>
+    
+    {% endif %}
+</body>
+</html>
+ 

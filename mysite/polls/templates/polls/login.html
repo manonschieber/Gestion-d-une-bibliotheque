@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang='fr'>
+    <head>
+        <meta charset = "UTF-8">
+        <title>Connexion</title>
+    </head>
+</html>
+
+<body>
+
+<form action = "{% url 'polls:login' %}" method = "post">
+    {% csrf_token %}
+    {{form}}
+    <button type="submit">Login</button>
+</form>
+</body>
+</html>
