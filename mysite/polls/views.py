@@ -18,11 +18,12 @@ def catalogue(request):
     }
     return render(request, 'polls/catalogue.html', context)
 
+def contact(request):
+    return render(request, 'polls/contact.html')
+
 def moncompte(request):
  #   return render(request, 'polls/moncompte.html')
     return HttpResponseRedirect('/polls/login')
-
-
 
 def search(request):
     query = request.GET.get('query')
@@ -65,11 +66,6 @@ def mesreservations(request):
     context = {
     }
     return render(request, 'polls/mesreservations.html', context)
-
-def infos(request):
-    context = {
-    }
-    return render(request, 'polls/infos.html', context)
 
 def mesemprunts(request):
     context = {

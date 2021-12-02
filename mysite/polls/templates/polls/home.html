@@ -1,32 +1,52 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Cours Complet Bootstrap 4</title>
-    <meta charset='utf-8'>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  </head>
-  <body>
-    <div class="container">
-      <nav class="navbar navbar-expand navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">Biblivres</a>
-        <ul class="navbar-nav">
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">Mon espace perso</a>
-            <div class="dropdown-menu">
-              <a class="dropdown-item" href="#">Mes informations personnelles</a>
-              <a class="dropdown-item" href="#">Mes réservations en cours</a>
-              <a class="dropdown-item" href="#">Mes emprunts en cours</a>
-            </div>
-          </li>
-          <li class="nav-item"><a class="nav-link " href="catalogue/">Catalogue</a></li>
-          <li class="nav-item"><a class="nav-link " href="#">Contact</a></li>
-        </ul>
-      </nav>
-    </div>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-  </body>
-</html>
+{% extends 'polls/base.html' %}
 
+{% block content %}
+  <body>
+        <div class="container">
+          <div id="demo" class="carousel slide carousel-fade" data-ride="carousel">
+            <!-- Indicateurs -->
+            <ul class="carousel-indicators">
+              <li data-target="#demo" data-slide-to="0" class="active"></li>
+              <li data-target="#demo" data-slide-to="1"></li>
+              <li data-target="#demo" data-slide-to="2"></li>
+            </ul>
+    
+            <!-- Carrousel -->
+            <div class="carousel-inner">
+              <div class="carousel-item active" data-interval="4000">
+                <img src="https://source.unsplash.com/1600x450/?library" alt="Carrousel slide 1" class="d-block w-100">
+              </div>
+              <div class="carousel-item" data-interval="2000">
+                <img src="https://source.unsplash.com/1600x450/?book" alt="Carrousel slide 2" class="d-block w-100">
+              </div>
+              <div class="carousel-item" data-interval="1000">
+                <img src="https://source.unsplash.com/1600x450/?read" alt="Carrousel slide 3" class="d-block w-100">
+              </div>
+            </div>
+            
+            <!-- Contrôles -->
+            <a class="carousel-control-prev" href="#demo" role="button" data-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="sr-only">Précédent</span>
+            </a>
+            <a class="carousel-control-next" href="#demo" role="button" data-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="sr-only">Suivant</span>
+            </a>
+          </div>
+        </div>
+    <br>
+    <div class="container">
+      <h2>Horaires d'ouverture</h2>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">Lundi : 08:30-19:00</li>
+        <li class="list-group-item">Mardi : 08:30-19:00</li>
+        <li class="list-group-item">Mercredi : 08:30-19:00</li>
+        <li class="list-group-item">Jeudi : 08:30-19:00</li>
+        <li class="list-group-item">Vendredi : 08:30-19:00</li>
+        <li class="list-group-item">Samedi : 10:00-16:00</li>
+      </ul>
+    </div>
+  </body>
+
+{% endblock %}
