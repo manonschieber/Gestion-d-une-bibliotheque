@@ -10,6 +10,9 @@ from .forms import NameForm
 
 def home(request):
     return render(request, 'polls/home.html')
+    
+def mesinfospersos(request):
+    return HttpResponseRedirect('/polls/login')
 
 def catalogue(request):
     livresList = Livre.objects.order_by('-titre')
@@ -20,10 +23,6 @@ def catalogue(request):
 
 def contact(request):
     return render(request, 'polls/contact.html')
-
-def moncompte(request):
- #   return render(request, 'polls/moncompte.html')
-    return HttpResponseRedirect('/polls/login')
 
 def search(request):
     query = request.GET.get('query')

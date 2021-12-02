@@ -1,17 +1,15 @@
-<!DOCTYPE html>
-<html lang='fr'>
-    <head>
-        <meta charset = "UTF-8">
-        <title>Connexion</title>
-    </head>
-</html>
+{% extends 'polls/base.html' %}
 
-<body>
+{% block content %}
 
-<form action = "{% url 'polls:login' %}" method = "post">
-    {% csrf_token %}
-    {{form}}
-    <button type="submit">Login</button>
-</form>
-</body>
-</html>
+    <h1>Connexion</h1>
+    <body>
+
+        <form action = "{% url 'polls:login' %}" method = "post">
+            {% csrf_token %}
+            {{form}}
+            <button type="submit">Login</button>
+        </form>
+        </body>
+
+{% endblock %}

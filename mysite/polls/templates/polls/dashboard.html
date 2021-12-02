@@ -1,12 +1,10 @@
-<!DOCTYPE html>
-<html lang='fr'>
-    <head>
-        <meta charset = "UTF-8">
-        <title>Dashboard</title>
-    </head>
-</html>
+{% extends 'polls/base.html' %}
 
-<body>
+
+{% block content %}
+
+  <h1>Dashboard</h1>
+  <body>
     {% if request.user.is_authenticated %}
         <p>Salut {{request.user}}  </p>
         <a href="{% url 'polls:logout' %}">Logout</a>
@@ -16,5 +14,6 @@
     
     {% endif %}
 </body>
-</html>
+
+{% endblock %}
  
