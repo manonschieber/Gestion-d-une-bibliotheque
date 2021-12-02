@@ -3,10 +3,10 @@
 {% block content %}
 
 {% if request.user.is_authenticated %}
-<p>Emprunts en cours de {{request.user}}  </p>
+<p>Informations personnelles de {{request.user}}  </p>
 
 {% else %}
-<p>Connectez vous pour accéder à vos emprunts en cours.</p>
+<p>Connectez vous pour accéder à vos informations personnelles.</p>
 
 {% endif %}
 

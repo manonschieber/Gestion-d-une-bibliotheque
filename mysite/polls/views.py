@@ -13,7 +13,17 @@ def home(request):
     return render(request, 'polls/home.html')
     
 def mesinfospersos(request):
-    return HttpResponseRedirect('/polls/login')
+    return render(request, 'polls/mesinfospersos.html')
+
+def mesreservations(request):
+    context = {
+    }
+    return render(request, 'polls/mesreservations.html', context)
+
+def mesemprunts(request):
+    context = {
+    }
+    return render(request, 'polls/mesemprunts.html', context)
 
 def catalogue(request):
     livresList = Livre.objects.order_by('-titre')
@@ -21,9 +31,6 @@ def catalogue(request):
         'livresList': livresList,
     }
     return render(request, 'polls/catalogue.html', context)
-
-def contact(request):
-    return render(request, 'polls/contact.html')
 
 def search(request):
     query = request.GET.get('query')
@@ -37,16 +44,6 @@ def search(request):
         'title': title
     }
     return render(request, 'polls/search.html', context)
-
-# def detail(request, pk):
-#     livre = Livre.objects.get(pk=pk)
-#     context = {
-#         'livre_titre': livre.titre,
-#         'livre_nomAuteur': livre.nomAuteur,
-#         'livre_prenomAuteur': livre.prenomAuteur,
-#         'livre_disponibilite': livre.disponible
-#     }
-#     return render(request, 'polls/detailLivre.html', context)
 
 def detail(request, pk):
     with connection.cursor() as cursor :
@@ -63,30 +60,8 @@ def detail(request, pk):
     }
     return render(request, 'polls/detail.html', context)
 
-def index(request):
-    livres = Livre.objects.order_by('-titre')
-    context = {
-        'livres': livres
-    }
-    return render(request, 'polls/index.html', context)
-
-def listing(request):
-    livres = Livre.objects.order_by('-titre')
-    context = {
-        'livres': livres
-    }
-    return render(request, 'polls/listing.html', context)
-
-def mesreservations(request):
-    context = {
-    }
-    return render(request, 'polls/mesreservations.html', context)
-
-def mesemprunts(request):
-    context = {
-    }
-    return render(request, 'polls/mesemprunts.html', context)
-
+def contact(request):
+    return render(request, 'polls/contact.html')
 
 class DashboardView(TemplateView):
     template_name = "polls/dashboard.html"

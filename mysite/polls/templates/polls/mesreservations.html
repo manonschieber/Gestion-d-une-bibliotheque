@@ -1,1 +1,13 @@
-<h1>Mes réservations</h1>
+{% extends 'polls/base.html' %}
+
+{% block content %}
+
+{% if request.user.is_authenticated %}
+<p>Réservations de {{request.user}}  </p>
+
+{% else %}
+<p>Connectez vous pour accéder à vos réservations.</p>
+
+{% endif %}
+
+{% endblock %}
