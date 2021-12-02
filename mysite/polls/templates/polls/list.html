@@ -5,16 +5,17 @@
 </div>
 
 {% include 'polls/search_form.html' %}
-
+<br>
 {% if livres|length_is:"0" %}
     <div class="text-center">
       Malheureusement, aucun livre ne correspond à votre recherche dans le catalogue Biblivres. 
     </div>
 
 {% else %}
+<div class="list-group">
     {% for livre in livres %}
-    <a href="{% url 'polls:detail' pk=livre.id %}">{{livre.titre}}</a>
+    <a href="{% url 'polls:detail' pk=livre.id %}" class="list-group-item list-group-item-action">{{livre.titre}}</a>
      <br/>
     {% endfor %}
-
+</div>
 {% endif %}

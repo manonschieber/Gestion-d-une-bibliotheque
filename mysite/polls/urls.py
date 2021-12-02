@@ -12,6 +12,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('mesinfospersos/', views.mesinfospersos, name='mesinfospersos'),
     path('catalogue/', views.catalogue, name='catalogue'),
+    path('<int:pk>/', views.detail, name="detail"),
     path('contact/', views.contact, name='contact'),
     url(r'^login/$', view=LoginView.as_view(template_name="polls/login.html", redirect_authenticated_user = True), name='login'),
     url(r'^logout/$', view=LogoutView.as_view(), name = "logout"),
@@ -21,6 +22,4 @@ urlpatterns = [
     path('mesreservations/', views.mesreservations, name='mesreservations'),
     path('mesemprunts/', views.mesemprunts, name='mesemprunts'),
     url(r'^search/$', views.search, name='search'),
-    path('<int:pk>/', views.detail, name="detail"),
-    path('your-name/', views.get_name, name="get_name"),
 ]

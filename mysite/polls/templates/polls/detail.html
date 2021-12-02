@@ -1,0 +1,19 @@
+{% extends 'polls/base.html' %}
+
+{% block content %}
+<h1 class="intro-text text-start">{{ livre_titre }}</h1>
+<div class="col-md-6">
+  <div style="margin-bottom:45px">
+    <h2 class="text-start livre_nomAuteur">{{ livre_nomAuteur }}  {{ livre_prenomAuteur }}</h2>
+  </div>
+</div>
+
+<div>
+    {% if livre_disponibilite and  livre_empruntabilite %}
+    {% include 'polls/detailLivre.html' %}
+    {% else %}
+    {% include 'polls/detailLivreReserve.html' %}
+    {% endif %}
+</div>
+
+{% endblock %}

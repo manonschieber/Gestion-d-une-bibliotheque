@@ -57,9 +57,11 @@ def detail(request, pk):
         'livre_titre': livre[0]["titre"],
         'livre_nomAuteur': livre[0]["nomAuteur"],
         'livre_prenomAuteur': livre[0]["prenomAuteur"],
-        'livre_disponibilite': livre[0]["disponible"]
+        'livre_disponibilite': livre[0]["disponible"],
+        'livre_empruntabilite': livre[0]["empruntable"],
+        'livre_pk':pk
     }
-    return render(request, 'polls/detailLivre.html', context)
+    return render(request, 'polls/detail.html', context)
 
 def index(request):
     livres = Livre.objects.order_by('-titre')
@@ -84,15 +86,6 @@ def mesemprunts(request):
     context = {
     }
     return render(request, 'polls/mesemprunts.html', context)
-
-def get_name(request):
-    if request.method == 'POST':
-        form = NameForm(request.POST)
-        if form.is_valid():
-            return HttpResponseRedirect('/thanks/')
-    else:
-        form = NameForm()
-    return render(request, 'polls/name.html', {'form': form})
 
 
 class DashboardView(TemplateView):
