@@ -13,6 +13,11 @@ def home(request):
     return render(request, 'polls/home.html')
     
 def mesinfospersos(request):
+    client = Client.objects.filter(user=request.user)
+    print(client)
+    context = {
+    'client' : client
+    }
     return render(request, 'polls/mesinfospersos.html')
 
 def mesreservations(request):

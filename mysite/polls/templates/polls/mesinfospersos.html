@@ -3,8 +3,22 @@
 {% block content %}
 
 {% if request.user.is_authenticated %}
-<p>Informations personnelles de {{request.user}}  </p>
-
+<div class="container mt-5">
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-7">
+            <div class="card p-3 py-4">
+                <div class="text-center"> <img src="https://us.123rf.com/450wm/alekseyvanin/alekseyvanin1704/alekseyvanin170403663/76699411-vecteur-d-ic%C3%B4ne-utilisateur-illustration-de-logo-solide-de-profil-pictogramme-isol%C3%A9-sur-blanc.jpg?ver=6" width="100" class="rounded-circle"> </div>
+                <div class="text-center mt-3"> <span class="bg-secondary p-1 px-4 rounded text-white">{{request.bad_borrower}}</span>
+                    <h5 class="mt-2 mb-0">{{request.user.first_name}} {{request.user.last_name}}</h5> <span>statut : {{request.status}} </span>
+                    <br>
+                    <div class="px-4 mt-1">
+                        <p class="fonts">SI vous souhaitez modifier ces informations, merci de contacter un administrateur.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% else %}
 <p>Connectez vous pour accéder à vos informations personnelles.</p>
 
