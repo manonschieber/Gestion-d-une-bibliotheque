@@ -6,7 +6,7 @@ from django.contrib.auth import *
 from django.views.generic import TemplateView
 from django.db import connection
 
-from .models import Livre
+from .models import Client, Livre,Emprunt
 from .forms import NameForm
 
 def home(request):
@@ -21,7 +21,9 @@ def mesreservations(request):
     return render(request, 'polls/mesreservations.html', context)
 
 def mesemprunts(request):
+    emprunts = Emprunt.objects.filter(client=request.user.id)
     context = {
+    'emprunts' : emprunts
     }
     return render(request, 'polls/mesemprunts.html', context)
 

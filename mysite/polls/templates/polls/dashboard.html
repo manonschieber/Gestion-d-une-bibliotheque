@@ -6,7 +6,7 @@
   <h1>Dashboard</h1>
   <body>
     {% if request.user.is_authenticated %}
-        <p>Salut {{request.user}}  </p>
+        <p>Salut {{request.user.first_name}} {{request.user.last_name}} </p>
         <a href="{% url 'polls:logout' %}">Logout</a>
 
     {% else %}

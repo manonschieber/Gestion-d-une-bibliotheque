@@ -3,7 +3,21 @@
 {% block content %}
 
 {% if request.user.is_authenticated %}
-<p>Emprunts en cours de {{request.user}}  </p>
+<p>Mes emprunts en cours :</p>
+
+{% if emprunts|length_is:"0" %}
+    <div class="text-center">
+      Vous n'avez emprunté aucun livre pour le moment. 
+    </div>
+
+{% else %}
+<div class="list-group">
+    {% for emprunt in emprunts %}
+    <a href="{% url 'polls:detail' pk=emprunt.livre.id %}" class="list-group-item list-group-item-action">{{emprunt.livre.titre}}</a>
+     <br/>
+    {% endfor %}
+</div>
+{% endif %}
 
 {% else %}
 <p>Connectez vous pour accéder à vos emprunts en cours.</p>

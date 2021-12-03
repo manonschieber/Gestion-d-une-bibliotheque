@@ -10,17 +10,10 @@ class Client(models.Model):
     status = models.CharField(max_length=15, default='plein tarif') # chômeur gratuit étudiant, élève ou militaire
     bad_borrower = models.BooleanField(default=False)
     blacklisted_until = models.DateField(null=True, blank=True)
+    # def __str__(self):
+    #     return self.user
 
-    # nom = models.CharField(max_length=20)
-    # prenom = models.CharField(max_length=20)
-    # status = models.CharField(max_length=15)   #chômeur gratuit étudiant élève ou militaire
-    #solde = models.DecimalField(max_digits=5, decimal_places=2)
-    #penalites = models.IntegerField(default=0)
 
-    #liste des emprunts
-
-    def __str__(self):
-        return self.prenom + " " + self.nom
 
 class Livre(models.Model):
     nomAuteur = models.CharField(max_length=20)
@@ -46,6 +39,9 @@ class Emprunt(models.Model):
     retour_max_le=models.DateField(default=timezone.now()+timedelta(days=30))
     rendu_le=models.DateField(null=True, blank=True)
     en_retard=models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.livre.titre
 
 class Paiement(models.Model):
     client=models.ForeignKey(Client, on_delete=models.CASCADE)
