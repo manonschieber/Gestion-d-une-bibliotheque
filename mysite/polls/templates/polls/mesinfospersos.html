@@ -8,9 +8,22 @@
         <div class="col-md-7">
             <div class="card p-3 py-4">
                 <div class="text-center"> <img src="https://us.123rf.com/450wm/alekseyvanin/alekseyvanin1704/alekseyvanin170403663/76699411-vecteur-d-ic%C3%B4ne-utilisateur-illustration-de-logo-solide-de-profil-pictogramme-isol%C3%A9-sur-blanc.jpg?ver=6" width="100" class="rounded-circle"> </div>
-                <div class="text-center mt-3"> <span class="bg-secondary p-1 px-4 rounded text-white">{{request.bad_borrower}}</span>
-                    <h5 class="mt-2 mb-0">{{request.user.first_name}} {{request.user.last_name}}</h5> <span>statut : {{request.status}} </span>
+                <div class="text-center mt-3"> 
+                    <h5 class="mt-2 mb-0">{{request.user.first_name}} {{request.user.last_name}}</h5>
                     <br>
+
+                    {% if not request.user.client.bad_borrower %} 
+                        <span class="bg-success p-1 px-4 rounded text-white"> Emprunt autorisé </span>
+
+                    {% else %}
+                        <span class="bg-danger p-1 px-4 rounded text-white">Blacklisté jusqu'au {{request.user.client.blacklisted_until}} </span>
+                
+                    {% endif %}
+                    <br>
+
+                    <span>Statut : {{request.user.client.status}} </span> <br>
+                    <span>Date de naissance : {{request.user.client.birth_date}} </span><br>
+                    <span>email : {{request.user.email}}</span> <br>
                     <div class="px-4 mt-1">
                         <p class="fonts">SI vous souhaitez modifier ces informations, merci de contacter un administrateur.</p>
                     </div>

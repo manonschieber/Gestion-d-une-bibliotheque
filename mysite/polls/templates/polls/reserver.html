@@ -3,7 +3,7 @@
 {% block content %}
 
 {% if request.user.is_authenticated %}
-<p>Mes réservations en cours :</p>
+<p>Mes réservations en cours :{{infos}}</p>
 
 {% if reservations|length_is:"0" %}
     <div class="text-center">
@@ -19,7 +19,7 @@
 {% endif %}
 
 {% else %}
-<p>Connectez vous pour accéder à vos réservations en cours.</p>
+<p>Connectez vous pour pouvoir réserver.</p>
 
 {% endif %}
 

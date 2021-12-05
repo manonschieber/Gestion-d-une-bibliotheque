@@ -35,7 +35,8 @@ class Emprunt(models.Model):
     livre=models.ForeignKey(Livre, on_delete=models.CASCADE)
     client=models.ForeignKey(Client, on_delete=models.CASCADE)
 
-    emprunte_le=models.DateField(default=timezone.now())
+    reserve_le=models.DateField(null=True, blank=True)
+    emprunte_le=models.DateField(null=True, blank=True)
     retour_max_le=models.DateField(default=timezone.now()+timedelta(days=30))
     rendu_le=models.DateField(null=True, blank=True)
     en_retard=models.BooleanField(default=False)

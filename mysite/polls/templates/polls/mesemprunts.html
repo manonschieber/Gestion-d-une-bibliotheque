@@ -3,20 +3,36 @@
 {% block content %}
 
 {% if request.user.is_authenticated %}
-<p>Mes emprunts en cours :</p>
+<h1>Mes emprunts en cours</h1>
 
 {% if emprunts|length_is:"0" %}
     <div class="text-center">
-      Vous n'avez emprunté aucun livre pour le moment. 
+      Vous n'avez aucun emprunt en cours. 
     </div>
 
 {% else %}
-<div class="list-group">
-    {% for emprunt in emprunts %}
-    <a href="{% url 'polls:detail' pk=emprunt.livre.id %}" class="list-group-item list-group-item-action">{{emprunt.livre.titre}}</a>
-     <br/>
-    {% endfor %}
-</div>
+<table class="table">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Titre</th>
+      <th scope="col">Auteur</th>
+      <th scope="col">Emprunté le</th>
+      <th scope="col">A rendre avant le</th>
+      <th scope="col"></th>
+    </tr>
+    <tbody>
+      {% for emprunt in emprunts %} 
+      <tr>
+        <th scope="row"><a href="{% url 'polls:detail' pk=emprunt.id %}" class="list-group-item-action">{{emprunt.titre}}</a></th>
+        <td>{{emprunt.nomAuteur}} {{emprunt.prenomAuteur}}</td>
+        <td>{{emprunt.emprunte_le}}</td>
+        <td>{{emprunt.retour_max_le}}</td>
+        <td><a href=# class="list-group-item-action">Prolonger emprunt</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </thead>
+</table>
 {% endif %}
 
 {% else %}

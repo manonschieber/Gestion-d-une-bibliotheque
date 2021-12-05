@@ -3,10 +3,10 @@
 <h2 class="text-center artist_name">Réserver {{ livre_titre }}</h2>
 <p style="margin-bottom: 20px;">Demandez-nous de mettre de côté {{ livre_titre }} et venez le chercher dès demain à la bilbiothèque ! </p>
 <form class="col-md-6 col-md-offset-3 text-center" action="{% url 'polls:detail' livre_pk %}" method="get" accept-charset="utf-8">
-  <div class="form-group">
-    <button type="submit" class="btn btn-labeled btn-success">
+  <div>
+    <a href="{% url 'polls:reserver' pk=livre_pk %}" class="badge badge-secondary p-1 px-4">
       Réserver
-    </button>
+    </a>
   </div>
 </form>
 

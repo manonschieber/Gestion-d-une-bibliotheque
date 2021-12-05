@@ -5,5 +5,12 @@
 
 {% include 'polls/search_form.html' %} 
 
+<div class="list-group list-group-flush">
+    {% for livre in livresList %}
+    <a href="{% url 'polls:detail' pk=livre.id %}" class="list-group-item list-group-item-action">{{livre.titre}}</a>
+    {% endfor %}
+</div>
+
+
 {% endblock %}
 

@@ -21,19 +21,44 @@ def mesinfospersos(request):
     return render(request, 'polls/mesinfospersos.html')
 
 def mesreservations(request):
+    with connection.cursor() as cursor :
+        cursor.execute(
+            "SELECT Livre.id, Livre.titre\
+            FROM polls_Emprunt AS Emprunt \
+            JOIN polls_Client AS Client \
+            ON Emprunt.client_id = Client.id \
+            JOIN polls_Livre AS Livre \
+            ON  Livre.id = Emprunt.livre_id \
+            WHERE Client.id=%s AND Emprunt.emprunte_le isnull"
+            , [request.user.client.id])
+        columns = [col[0] for col in cursor.description]
+        reservations = [dict(zip(columns, row)) for row in cursor.fetchall()]
     context = {
+        'reservations': reservations
     }
     return render(request, 'polls/mesreservations.html', context)
 
 def mesemprunts(request):
-    emprunts = Emprunt.objects.filter(client=request.user.id)
+    with connection.cursor() as cursor :
+        cursor.execute(
+            "SELECT Livre.id, Livre.titre, Livre.nomAuteur, Livre.prenomAuteur, Emprunt.emprunte_le, Emprunt.retour_max_le, Emprunt.en_retard\
+            FROM polls_Emprunt AS Emprunt \
+            JOIN polls_Client AS Client \
+            ON Emprunt.client_id = Client.id \
+            JOIN polls_Livre AS Livre \
+            ON  Livre.id = Emprunt.livre_id \
+            WHERE Client.id=%s AND Emprunt.emprunte_le is not null AND rendu_le isnull"
+            , [request.user.client.id])
+        columns = [col[0] for col in cursor.description]
+        emprunts = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        print(emprunts)
     context = {
-    'emprunts' : emprunts
+        'emprunts': emprunts
     }
     return render(request, 'polls/mesemprunts.html', context)
 
 def catalogue(request):
-    livresList = Livre.objects.order_by('-titre')
+    livresList = Livre.objects.order_by('titre')
     context = {
         'livresList': livresList,
     }
@@ -57,18 +82,32 @@ def detail(request, pk):
         cursor.execute("SELECT * FROM polls_Livre WHERE id=%s", [pk])
         columns = [col[0] for col in cursor.description]
         livre = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        print(livre)
     context = {
         'livre_titre': livre[0]["titre"],
         'livre_nomAuteur': livre[0]["nomAuteur"],
         'livre_prenomAuteur': livre[0]["prenomAuteur"],
-        'livre_disponibilite': livre[0]["disponible"],
-        'livre_empruntabilite': livre[0]["empruntable"],
+        'livre_disponible': livre[0]["disponible"],
+        'livre_empruntable': livre[0]["empruntable"],
         'livre_pk':pk
     }
     return render(request, 'polls/detail.html', context)
 
+def reserver(request, pk):
+    # with connection.cursor() as cursor :
+    #     cursor.execute("INSERT INTO polls_Emprunt (id, emprunte_le, rendu_le, en_retard, client_id, livre_id, reserve_le, retour_max_le) \
+    #     VALUES \
+    #     (6, NULL, NULL, False, %s, %s, date('now'), date('now','+30 days'))", 
+    #     [request.user.client.id, pk])
+    infos = infos_perso(request.user.client)
+    context = {
+        'infos':infos
+    }
+    return render(request, 'polls/reserver.html', context)
+
 def contact(request):
     return render(request, 'polls/contact.html')
+
 
 class DashboardView(TemplateView):
     template_name = "polls/dashboard.html"
@@ -79,6 +118,32 @@ class DashboardView(TemplateView):
 
 def infos_perso(self):
     with connection.cursor() as cursor :
-        cursor.execute("SELECT * FROM Client where username=%s", [self.user])
+        cursor.execute("SELECT * FROM polls_Client where id=%s", [self.id])
         row = cursor.fetchone()
     return row
+
+def blacklisted_client(self):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT bad_borrower FROM polls_Client where id=%s", [self.id])
+        row = cursor.fetchone()
+    return row[0]
+
+def livre_disponible(self):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT (disponible AND empruntable) AS livre_empruntable FROM polls_livre where id=%s", [self.id])
+        row = cursor.fetchone()
+    return row[0]
+
+# def nb_emprunt_inf_lim(self):
+#     with connection.cursor() as cursor:
+#         cursor.execute(
+#             "SELECT COUNT(DISTINCT id) AS emprunts_en_cours_livres \
+#             FROM polls_Emprunt AS Emp \
+#             JOIN polls_Livre AS Livre\
+#             ON Livre.id  = Emp.livre_id\
+#             WHERE Livre.support='Livre'AND client_id=%s", [self.id])
+#         emprunts_en_cours_livres = cursor.fetchone()[0]
+
+#         cursor.execute(
+
+#         )

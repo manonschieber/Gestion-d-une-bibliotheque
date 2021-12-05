@@ -9,7 +9,7 @@
 </div>
 
 <div>
-    {% if livre_disponibilite and  livre_empruntabilite %}
+    {% if livre_disponible and  livre_empruntable %}
     {% include 'polls/detailLivre.html' %}
     {% else %}
     {% include 'polls/detailLivreReserve.html' %}
