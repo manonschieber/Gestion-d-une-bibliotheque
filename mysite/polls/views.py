@@ -6,7 +6,7 @@ from django.contrib.auth import *
 from django.views.generic import TemplateView
 from django.db import connection
 
-from .models import Client, Livre,Emprunt
+from .models import Client, Livre, Emprunt
 from .forms import NameForm
 
 def home(request):
@@ -21,18 +21,21 @@ def mesinfospersos(request):
     return render(request, 'polls/mesinfospersos.html')
 
 def mesreservations(request):
-    with connection.cursor() as cursor :
-        cursor.execute(
-            "SELECT Livre.id, Livre.titre\
-            FROM polls_Emprunt AS Emprunt \
-            JOIN polls_Client AS Client \
-            ON Emprunt.client_id = Client.id \
-            JOIN polls_Livre AS Livre \
-            ON  Livre.id = Emprunt.livre_id \
-            WHERE Client.id=%s AND Emprunt.emprunte_le isnull"
-            , [request.user.client.id])
-        columns = [col[0] for col in cursor.description]
-        reservations = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    if request.user.is_authenticated:
+        with connection.cursor() as cursor :
+            cursor.execute(
+                "SELECT Livre.id, Livre.titre\
+                FROM polls_Emprunt AS Emprunt \
+                JOIN polls_Client AS Client \
+                ON Emprunt.client_id = Client.id \
+                JOIN polls_Livre AS Livre \
+                ON  Livre.id = Emprunt.livre_id \
+                WHERE Client.id=%s AND Emprunt.emprunte_le isnull"
+                , [request.user.client.id])
+            columns = [col[0] for col in cursor.description]
+            reservations = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    else:
+        reservations = ''
     context = {
         'reservations': reservations
     }
@@ -94,11 +97,13 @@ def detail(request, pk):
     return render(request, 'polls/detail.html', context)
 
 def reserver(request, pk):
-    # with connection.cursor() as cursor :
-    #     cursor.execute("INSERT INTO polls_Emprunt (id, emprunte_le, rendu_le, en_retard, client_id, livre_id, reserve_le, retour_max_le) \
-    #     VALUES \
-    #     (6, NULL, NULL, False, %s, %s, date('now'), date('now','+30 days'))", 
-    #     [request.user.client.id, pk])
+    if request.user.is_authenticated :
+        if not( blacklisted_client(request.user.client) ) AND livre_disponible(pk): 
+    with connection.cursor() as cursor :
+        cursor.execute("INSERT INTO polls_Emprunt (id, emprunte_le, rendu_le, en_retard, client_id, livre_id, reserve_le, retour_max_le) \
+        VALUES \
+        (6, NULL, NULL, False, %s, %s, date('now'), date('now','+30 days'))", 
+        [request.user.client.id, pk])
     infos = infos_perso(request.user.client)
     context = {
         'infos':infos
@@ -130,20 +135,30 @@ def blacklisted_client(self):
 
 def livre_disponible(self):
     with connection.cursor() as cursor:
-        cursor.execute("SELECT (disponible AND empruntable) AS livre_empruntable FROM polls_livre where id=%s", [self.id])
+        cursor.execute("SELECT (disponible AND empruntable) AS livre_empruntable FROM polls_livre where id=%s", [self])
         row = cursor.fetchone()
     return row[0]
+    
 
-# def nb_emprunt_inf_lim(self):
-#     with connection.cursor() as cursor:
-#         cursor.execute(
-#             "SELECT COUNT(DISTINCT id) AS emprunts_en_cours_livres \
-#             FROM polls_Emprunt AS Emp \
-#             JOIN polls_Livre AS Livre\
-#             ON Livre.id  = Emp.livre_id\
-#             WHERE Livre.support='Livre'AND client_id=%s", [self.id])
-#         emprunts_en_cours_livres = cursor.fetchone()[0]
+def nb_emprunt_inf_lim(self):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT COUNT(DISTINCT id) AS emprunts_en_cours_livres \
+            FROM polls_Emprunt AS Emp \
+            JOIN polls_Livre AS Livre\
+            ON Livre.id  = Emp.livre_id\
+            WHERE Livre.support='Livre'AND Emp.rendu_le isnull AND client_id=%s", [self.id])
+        emprunts_en_cours_livres = cursor.fetchone()[0]
 
-#         cursor.execute(
+        cursor.execute(
+            "SELECT COUNT(DISTINCT id) AS emprunts_en_cours_livres \
+            FROM polls_Emprunt AS Emp \
+            JOIN polls_Livre AS Livre\
+            ON Livre.id  = Emp.livre_id\
+            WHERE Livre.support<>'Livre'AND Emp.rendu_le isnull AND client_id=%s", [self.id]
+        )
+        emprunts_en_cours_autres = cursor.fetchone()[0]
+    return (emprunts_en_cours_livres, emprunts_en_cours_autres)
 
-#         )
+def type_of_doc(self):
+    with connection.cursor() AS cursor:
