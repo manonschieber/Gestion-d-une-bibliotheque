@@ -3,23 +3,32 @@
 {% block content %}
 
 {% if request.user.is_authenticated %}
-<p>Mes réservations en cours :{{infos}}</p>
+    {% if reservation_done == 'success' %}
 
-{% if reservations|length_is:"0" %}
-    <div class="text-center">
-      Vous n'avez aucune réservation en cours. 
-    </div>
+        <div> Vous avez réservé {{titre}}, il vous attend à la bibliothèque !</div>
 
-{% else %}
-<div class="list-group list-group-flush">
-    {% for reservation in reservations %}
-            <a href="{% url 'polls:detail' pk=reservation.id %}" class="list-group-item list-group-item-action">{{reservation.titre}}</a>
-    {% endfor %}
-</div>
-{% endif %}
+    {% elif reservation_done == 'blacklist' %}
 
-{% else %}
-<p>Connectez vous pour pouvoir réserver.</p>
+        <div> Vous êtes blacklisté, vous ne pouvez pas réserver ce livre. </div>
+
+    {% elif reservation_done == 'livre_non_dispo' %}
+
+        <div> Ce livre n'est actuellement pas disponible à la réservation. </div>
+
+    {% elif reservation_done == 'max_livre' %}
+
+        <div> Vous avez dépassé le nombre d'emprunts maximal de livres. </div>
+
+    {% elif reservation_done == 'max_docs' %}
+
+        <div> Vous avez dépassé le nombre d'emprunts maximal. </div>
+
+    {% else %}
+
+    {% endif %}
+
+{% else %} 
+    <div> Veuillez vous connecter pour réserver ce livre. </div>
 
 {% endif %}
 

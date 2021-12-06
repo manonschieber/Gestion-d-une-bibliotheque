@@ -2,18 +2,16 @@
 
 
 {% block content %}
-
-  <h1>Dashboard</h1>
-  <body>
+  <div>
     {% if request.user.is_authenticated %}
-        <p>Salut {{request.user.first_name}} {{request.user.last_name}} </p>
-        <a href="{% url 'polls:logout' %}">Logout</a>
+        <p>Vous êtes connecté en tant que {{request.user.first_name}} {{request.user.last_name}}.</p>
+        <a href="{% url 'polls:logout' %}">Déconnexion</a>
 
     {% else %}
-        <p>Salut anonyme</p>
+        <p>Vous n'êtes pas connectés.</p>
     
     {% endif %}
-</body>
+  </div>
 
 {% endblock %}
  

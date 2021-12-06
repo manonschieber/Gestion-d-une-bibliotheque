@@ -3,7 +3,7 @@
 {% block content %}
 
 {% if request.user.is_authenticated %}
-<h1>Mes emprunts en cours</h1>
+<h3>Mes emprunts en cours</h3>
 
 {% if emprunts|length_is:"0" %}
     <div class="text-center">

@@ -1,7 +1,7 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.http import Http404
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth import *
 from django.views.generic import TemplateView
 from django.db import connection
@@ -24,7 +24,7 @@ def mesreservations(request):
     if request.user.is_authenticated:
         with connection.cursor() as cursor :
             cursor.execute(
-                "SELECT Livre.id, Livre.titre\
+                "SELECT Livre.id, Livre.titre, Livre.nomAuteur, Livre.prenomAuteur, Emprunt.reserve_le, Emprunt.retour_max_le, Emprunt.en_retard\
                 FROM polls_Emprunt AS Emprunt \
                 JOIN polls_Client AS Client \
                 ON Emprunt.client_id = Client.id \
@@ -40,6 +40,20 @@ def mesreservations(request):
         'reservations': reservations
     }
     return render(request, 'polls/mesreservations.html', context)
+
+# def annuler_reservation(request, pk):
+#     with connection.cursor() as cursor :
+#         cursor.execute(            
+#             "SELECT max(id) AS max_id FROM polls_Emprunt WHERE livre_id=%s AND client_id=%s GROUP BY client_id", [pk, request.user.client.id]
+#         )
+#         max_id = cursor.fetchone()[0]
+#         cursor.execute(
+#             "DELETE FROM polls_Emprunt WHERE id=%s;\
+#             UPDATE Livre \
+#             SET disponible=1 WHERE id=%s", 
+#             [max_id, pk]
+#         )
+#     return HttpResponseRedirect('polls/mesreservations.html')
 
 def mesemprunts(request):
     with connection.cursor() as cursor :
@@ -97,16 +111,34 @@ def detail(request, pk):
     return render(request, 'polls/detail.html', context)
 
 def reserver(request, pk):
-    if request.user.is_authenticated :
-        if not( blacklisted_client(request.user.client) ) AND livre_disponible(pk): 
-    with connection.cursor() as cursor :
-        cursor.execute("INSERT INTO polls_Emprunt (id, emprunte_le, rendu_le, en_retard, client_id, livre_id, reserve_le, retour_max_le) \
-        VALUES \
-        (6, NULL, NULL, False, %s, %s, date('now'), date('now','+30 days'))", 
-        [request.user.client.id, pk])
-    infos = infos_perso(request.user.client)
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT titre FROM polls_Livre WHERE id=%s", [pk])
+        titre=cursor.fetchone()[0]
+    if request.user.is_authenticated:
+        if blacklisted_client(request.user.client)==0 and livre_disponible(pk) \
+        and ((type_of_doc(pk)=='Livre' and nb_emprunt_inf_lim(request.user.client)[0]<3) \
+        or (type_of_doc(pk)!='Livre' and nb_emprunt_inf_lim(request.user.client)[1]<2)): 
+            
+            new_id=max_emprunt_id(request)+1
+
+            with connection.cursor() as cursor :
+                cursor.execute("INSERT INTO polls_Emprunt (id, emprunte_le, rendu_le, en_retard, client_id, livre_id, reserve_le, retour_max_le) \
+                VALUES \
+                (%s, NULL, NULL, False, %s, %s, date('now'), date('now','+30 days'))", 
+                [new_id,request.user.client.id, pk])
+                cursor.execute("UPDATE polls_Livre\
+                SET disponible=0 \
+                WHERE id=%s", [pk])
+            reservation_done = 'success'
+        elif blacklisted_client(request.user.client)==0 : reservation_done = 'blacklist'
+        elif not livre_disponible(pk): reservation_done ='livre_non_dispo'
+        elif (type_of_doc(pk)=='Livre' and nb_emprunt_inf_lim(request.user.client)[0]<3): reservation_done='max_livre'
+        elif (type_of_doc(pk)!='Livre' and nb_emprunt_inf_lim(request.user.client)[1]<2): reservation_done='max_docs'
+    else:
+        reservation_done = 'user_not_authenticated'
     context = {
-        'infos':infos
+        'reservation_done': reservation_done,
+        'titre': titre
     }
     return render(request, 'polls/reserver.html', context)
 
@@ -143,7 +175,7 @@ def livre_disponible(self):
 def nb_emprunt_inf_lim(self):
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT COUNT(DISTINCT id) AS emprunts_en_cours_livres \
+            "SELECT COUNT(DISTINCT Emp.id) AS emprunts_en_cours_livres \
             FROM polls_Emprunt AS Emp \
             JOIN polls_Livre AS Livre\
             ON Livre.id  = Emp.livre_id\
@@ -151,7 +183,7 @@ def nb_emprunt_inf_lim(self):
         emprunts_en_cours_livres = cursor.fetchone()[0]
 
         cursor.execute(
-            "SELECT COUNT(DISTINCT id) AS emprunts_en_cours_livres \
+            "SELECT COUNT(DISTINCT Emp.id) AS emprunts_en_cours_livres \
             FROM polls_Emprunt AS Emp \
             JOIN polls_Livre AS Livre\
             ON Livre.id  = Emp.livre_id\
@@ -161,4 +193,19 @@ def nb_emprunt_inf_lim(self):
     return (emprunts_en_cours_livres, emprunts_en_cours_autres)
 
 def type_of_doc(self):
-    with connection.cursor() AS cursor:
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT support FROM polls_Livre \
+            WHERE id=%s",
+            [self]
+        )
+        type_of_doc=cursor.fetchone()[0]
+    return(type_of_doc)
+
+def max_emprunt_id(self):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT max(id) AS max_id FROM polls_Emprunt"
+        )
+        max=cursor.fetchone()[0]
+    return(max)

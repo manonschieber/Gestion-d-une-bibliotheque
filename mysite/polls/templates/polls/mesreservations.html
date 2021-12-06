@@ -3,7 +3,7 @@
 {% block content %}
 
 {% if request.user.is_authenticated %}
-<p>Mes réservations en cours :</p>
+<h3>Mes réservations en cours :</h3>
 
 {% if reservations|length_is:"0" %}
     <div class="text-center">
@@ -12,9 +12,28 @@
 
 {% else %}
 <div class="list-group list-group-flush">
-    {% for reservation in reservations %}
-            <a href="{% url 'polls:detail' pk=reservation.id %}" class="list-group-item list-group-item-action">{{reservation.titre}}</a>
-    {% endfor %}
+  <table class="table">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">Titre</th>
+        <th scope="col">Auteur</th>
+        <th scope="col">Réservé le</th>
+        <th scope="col">A rendre avant le</th>
+        <th scope="col"></th>
+      </tr>
+      <tbody>
+        {% for reservation in reservations %} 
+        <tr>
+          <th scope="row"><a href="{% url 'polls:detail' pk=reservation.id %}" class="list-group-item-action">{{reservation.titre}}</a></th>
+          <td>{{reservation.nomAuteur}} {{reservation.prenomAuteur}}</td>
+          <td>{{reservation.reserve_le}}</td>
+          <td>{{reservation.retour_max_le}}</td>
+          <td><a href=# class="list-group-item-action">Annuler la réservation</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </thead>
+  </table>
 </div>
 {% endif %}
 

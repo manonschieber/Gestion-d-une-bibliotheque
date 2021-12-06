@@ -22,7 +22,10 @@
           </li>
           <li class="nav-item"><a class="nav-link " href="/catalogue/">Catalogue</a></li>
           <li class="nav-item"><a class="nav-link " href="/contact/">Contact</a></li>
-          <li class="nav-item"><a class="nav-link " href="/login/">Se connecter</a></li>
+          <li class="nav-item"><a class="nav-link " href="/login/">
+            {% if request.user.is_authenticated %} Se déconnecter
+            {% else %} Se connecter
+            {% endif %} </a></li>
         </ul>
       </nav>
     </div>
