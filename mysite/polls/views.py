@@ -6,6 +6,7 @@ from django.contrib.auth import *
 from django.views.generic import TemplateView
 from django.db import connection
 from datetime import datetime, timezone, timedelta
+from django.core.paginator import Paginator
 import pytz
 from django.db.models import Q
 
@@ -114,7 +115,10 @@ def mesemprunts(request):
     return render(request, 'polls/mesemprunts.html', context)
 
 def catalogue(request):
-    livresList = Livre.objects.order_by('titre')
+    List = Livre.objects.order_by('titre')
+    paginator = Paginator(List, 25)
+    page = request.GET.get('page')
+    livresList = paginator.get_page(page)
     context = {
         'livresList': livresList,
     }
@@ -138,7 +142,7 @@ def detail(request, pk):
         cursor.execute("SELECT * FROM polls_Livre WHERE id=%s", [pk])
         columns = [col[0] for col in cursor.description]
         livre = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        print(livre)
+        #print(livre)
     context = {
         'livre_titre': livre[0]["titre"],
         'livre_nomAuteur': livre[0]["nomAuteur"],
@@ -169,10 +173,10 @@ def reserver(request, pk):
                 SET disponible=0 \
                 WHERE id=%s", [pk])
             reservation_done = 'success'
-        elif blacklisted_client(request.user.client)==0 : reservation_done = 'blacklist'
+        elif blacklisted_client(request.user.client)==1 : reservation_done = 'blacklist'
         elif not livre_disponible(pk): reservation_done ='livre_non_dispo'
-        elif (type_of_doc(pk)=='Livre' and nb_emprunt_inf_lim(request.user.client)[0]<3): reservation_done='max_livre'
-        elif (type_of_doc(pk)!='Livre' and nb_emprunt_inf_lim(request.user.client)[1]<2): reservation_done='max_docs'
+        elif (type_of_doc(pk)=='Livre' and nb_emprunt_inf_lim(request.user.client)[0]>=3): reservation_done='max_livre'
+        elif (type_of_doc(pk)!='Livre' and nb_emprunt_inf_lim(request.user.client)[1]>=2): reservation_done='max_docs'
     else:
         reservation_done = 'user_not_authenticated'
     context = {
@@ -341,21 +345,23 @@ def livre_disponible(self):
 def nb_emprunt_inf_lim(self):
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT COUNT(DISTINCT Emp.id) AS emprunts_en_cours_livres \
+            "SELECT COUNT(DISTINCT Emp.id) \
             FROM polls_Emprunt AS Emp \
             JOIN polls_Livre AS Livre\
             ON Livre.id  = Emp.livre_id\
-            WHERE Livre.support='Livre'AND Emp.rendu_le isnull AND client_id=%s", [self.id])
+            WHERE Livre.support='Livre' AND Emp.rendu_le isnull AND client_id=%s", [self.id])
         emprunts_en_cours_livres = cursor.fetchone()[0]
+        print(emprunts_en_cours_livres)
 
         cursor.execute(
-            "SELECT COUNT(DISTINCT Emp.id) AS emprunts_en_cours_livres \
+            "SELECT COUNT(DISTINCT Emp.id) \
             FROM polls_Emprunt AS Emp \
             JOIN polls_Livre AS Livre\
             ON Livre.id  = Emp.livre_id\
-            WHERE Livre.support<>'Livre'AND Emp.rendu_le isnull AND client_id=%s", [self.id]
+            WHERE Livre.support<>'Livre' AND Emp.rendu_le isnull AND client_id=%s", [self.id]
         )
         emprunts_en_cours_autres = cursor.fetchone()[0]
+        print(emprunts_en_cours_autres)
     return (emprunts_en_cours_livres, emprunts_en_cours_autres)
 
 def type_of_doc(self):
@@ -366,6 +372,7 @@ def type_of_doc(self):
             [self]
         )
         type_of_doc=cursor.fetchone()[0]
+        print(type_of_doc)
     return(type_of_doc)
 
 def max_emprunt_id(self):

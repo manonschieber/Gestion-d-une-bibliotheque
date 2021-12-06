@@ -11,7 +11,7 @@
     </div>
 
 {% else %}
-<table class="table">
+<table class="table" style="table-layout: fixed; width: 98%; margin:auto">
   <thead class="thead-dark">
     <tr>
       <th scope="col">Titre</th>
@@ -27,7 +27,11 @@
         <td>{{emprunt.nomAuteur}} {{emprunt.prenomAuteur}}</td>
         <td>{{emprunt.emprunte_le}}</td>
         <td>{{emprunt.retour_max_le}}</td>
-        <td><a href=# class="list-group-item-action">Prolonger emprunt</a></td>
+        <td>
+          {% if emprunt.en_retard %} <span class="bg-danger p-1 px-4 rounded text-white">En retard</span>
+          {% else %} 
+          {% endif %} 
+        </td>
       </tr>
       {% endfor %}
     </tbody>

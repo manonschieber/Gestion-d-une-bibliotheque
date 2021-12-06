@@ -11,6 +11,27 @@
     {% endfor %}
 </div>
 
+<div class="pagination">
+    <span class="step-links">
+        {% if livresList.has_previous %}
+            <a href="?page=1">&laquo; première page</a>
+
+            <a href="?page={{livresList.previous_page_number}}"> page précédente </a>
+        {% endif %}
+
+    <span class="current">
+        Page {{livresList.number}} of {{livresList.paginator.num_pages}}
+    </span>
+
+        {% if livresList.has_next %} 
+            <a href="?page={{livresList.next_page_number}}">page suivante</a>
+        
+            <a href="?page={{livresList.paginator.num_pages}}"> dernière page &raquo;</a>
+        {% endif %}
+
+    </span>
+</div>
+
 
 {% endblock %}
 

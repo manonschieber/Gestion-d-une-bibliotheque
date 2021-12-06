@@ -2,14 +2,16 @@
 
 {% block content %}
 
-    <h1>Connexion</h1>
-    <body>
-
-        <form action = "{% url 'polls:login' %}" method = "post">
+<div class="container">
+    <h3>Connexion</h3>
+</div>
+<div class="container" style="text-align: center;">
+        <form class="form-check" action = "{% url 'polls:login' %}" method = "post">
+            <br>
             {% csrf_token %}
             {{form}}
-            <button type="submit">Login</button>
+            <button type="submit" class="btn btn-secondary px-4 p-1">Login</button>
         </form>
-        </body>
+</div>
 
 {% endblock %}
