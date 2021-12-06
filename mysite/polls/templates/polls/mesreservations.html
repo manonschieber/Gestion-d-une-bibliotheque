@@ -28,7 +28,7 @@
           <td>{{reservation.nomAuteur}} {{reservation.prenomAuteur}}</td>
           <td>{{reservation.reserve_le}}</td>
           <td>{{reservation.retour_max_le}}</td>
-          <td><a href=# class="list-group-item-action">Annuler la réservation</a></td>
+          <td><a href="{% url 'polls:annuler_reservation' pk=reservation.id %}" class="list-group-item-action">Annuler la réservation</a></td>
         </tr>
         {% endfor %}
       </tbody>

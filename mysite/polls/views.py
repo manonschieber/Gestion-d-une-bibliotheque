@@ -41,19 +41,28 @@ def mesreservations(request):
     }
     return render(request, 'polls/mesreservations.html', context)
 
-# def annuler_reservation(request, pk):
-#     with connection.cursor() as cursor :
-#         cursor.execute(            
-#             "SELECT max(id) AS max_id FROM polls_Emprunt WHERE livre_id=%s AND client_id=%s GROUP BY client_id", [pk, request.user.client.id]
-#         )
-#         max_id = cursor.fetchone()[0]
-#         cursor.execute(
-#             "DELETE FROM polls_Emprunt WHERE id=%s;\
-#             UPDATE Livre \
-#             SET disponible=1 WHERE id=%s", 
-#             [max_id, pk]
-#         )
-#     return HttpResponseRedirect('polls/mesreservations.html')
+def annuler_reservation(request, pk):
+    with connection.cursor() as cursor :
+        cursor.execute(            
+            "SELECT max(id) AS max_id FROM polls_Emprunt WHERE livre_id=%s AND client_id=%s GROUP BY client_id", [pk, request.user.client.id]
+        )
+        max_id = cursor.fetchone()[0]
+        cursor.execute(
+            "DELETE FROM polls_Emprunt WHERE id=%s", [max_id]
+        )
+        cursor.execute(
+            "UPDATE polls_Livre \
+            SET disponible=1 WHERE id=%s", 
+            [pk]
+        )
+        cursor.execute(
+            "SELECT titre FROM polls_Livre WHERE id=%s", [pk]
+        )
+        titre = cursor.fetchone()[0]
+    context = {
+        'titre': titre
+    }
+    return render(request, 'polls/reservation_annulee.html', context)
 
 def mesemprunts(request):
     with connection.cursor() as cursor :

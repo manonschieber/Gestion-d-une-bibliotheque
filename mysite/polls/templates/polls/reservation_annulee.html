@@ -1,0 +1,14 @@
+{% extends 'polls/base.html' %}
+
+{% block content %}
+
+{% if request.user.is_authenticated %}
+    
+    <div> Vous venez d'annuler la réservation de {{titre}}.</div>
+
+{% else %} 
+    <div> Erreur lors de l'annulation de la réservation : vous n'êtes pas connecté. </div>
+
+{% endif %}
+
+{% endblock %}
