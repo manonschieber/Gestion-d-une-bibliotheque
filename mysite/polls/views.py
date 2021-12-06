@@ -5,23 +5,46 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import *
 from django.views.generic import TemplateView
 from django.db import connection
+from datetime import datetime, timezone, timedelta
+import pytz
+from django.db.models import Q
 
-from .models import Client, Livre, Emprunt
+from .models import Client, Livre, Emprunt, Paiement
 from .forms import NameForm
 
 def home(request):
+    date_du_jour = datetime.now(timezone.utc)
+    if request.user.is_authenticated:
+        if (request.user.last_login-date_du_jour>timedelta(1)):    #si l'utilisateur s'est connecté il y a plus d'un jour, on regarde s'il ne doit pas payer la cotisation + on met à jour les paiements  
+            MAJ_paiement(request.user.client)
+            actualisation_cotisation(request.user.client)
     return render(request, 'polls/home.html')
     
 def mesinfospersos(request):
-    client = Client.objects.filter(user=request.user)
-    print(client)
+    client=[]
+    montant = 0
+    deadline=''
+    date_du_jour = datetime.now(timezone.utc)
+    if request.user.is_authenticated:
+        if (request.user.last_login-date_du_jour>timedelta(1)):    #si l'utilisateur s'est connecté il y a plus d'un jour, on regarde s'il ne doit pas payer la cotisation + on met à jour les paiements 
+            MAJ_paiement(request.user.client)
+            actualisation_cotisation(request.user.client)
+        client = Client.objects.filter(user=request.user)
+        montant = montant_du(request.user.client)
+        deadline = deadline_paiement(request.user.client)
     context = {
-    'client' : client
+    'client' : client,
+    'montant' : montant,
+    'deadline' : deadline
     }
-    return render(request, 'polls/mesinfospersos.html')
+    return render(request, 'polls/mesinfospersos.html',context)
 
 def mesreservations(request):
     if request.user.is_authenticated:
+        date_du_jour = datetime.now(timezone.utc)
+        if (request.user.last_login-date_du_jour>timedelta(1)):    #si l'utilisateur s'est connecté il y a plus d'un jour, on regarde s'il ne doit pas payer la cotisation + on met à jour les paiements du site 
+            actualisation_cotisation(request.user.client)
+            MAJ_paiement(request.user.client)
         with connection.cursor() as cursor :
             cursor.execute(
                 "SELECT Livre.id, Livre.titre, Livre.nomAuteur, Livre.prenomAuteur, Emprunt.reserve_le, Emprunt.retour_max_le, Emprunt.en_retard\
@@ -65,19 +88,23 @@ def annuler_reservation(request, pk):
     return render(request, 'polls/reservation_annulee.html', context)
 
 def mesemprunts(request):
-    with connection.cursor() as cursor :
-        cursor.execute(
-            "SELECT Livre.id, Livre.titre, Livre.nomAuteur, Livre.prenomAuteur, Emprunt.emprunte_le, Emprunt.retour_max_le, Emprunt.en_retard\
-            FROM polls_Emprunt AS Emprunt \
-            JOIN polls_Client AS Client \
-            ON Emprunt.client_id = Client.id \
-            JOIN polls_Livre AS Livre \
-            ON  Livre.id = Emprunt.livre_id \
-            WHERE Client.id=%s AND Emprunt.emprunte_le is not null AND rendu_le isnull"
-            , [request.user.client.id])
-        columns = [col[0] for col in cursor.description]
-        emprunts = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        print(emprunts)
+    emprunts=[]
+    if request.user.is_authenticated: 
+        date_du_jour = datetime.now(timezone.utc)
+        if (request.user.last_login-date_du_jour>timedelta(1)):    #si l'utilisateur s'est connecté il y a plus d'un jour, on regarde s'il ne doit pas payer la cotisation 
+            actualisation_cotisation(request.user.client)
+        with connection.cursor() as cursor :
+            cursor.execute(
+                "SELECT Livre.id, Livre.titre, Livre.nomAuteur, Livre.prenomAuteur, Emprunt.emprunte_le, Emprunt.retour_max_le, Emprunt.en_retard\
+                FROM polls_Emprunt AS Emprunt \
+                JOIN polls_Client AS Client \
+                ON Emprunt.client_id = Client.id \
+                JOIN polls_Livre AS Livre \
+                ON  Livre.id = Emprunt.livre_id \
+                WHERE Client.id=%s AND Emprunt.emprunte_le is not null AND rendu_le isnull"
+                , [request.user.client.id])
+            columns = [col[0] for col in cursor.description]
+            emprunts = [dict(zip(columns, row)) for row in cursor.fetchall()]
     context = {
         'emprunts': emprunts
     }
@@ -95,7 +122,7 @@ def search(request):
     if not query:
         livres = Livre.objects.all()
     else:
-        livres = Livre.objects.filter(titre__icontains=query)
+        livres = Livre.objects.filter(Q(titre__icontains=query)|Q(prenomAuteur__icontains=query)|Q(nomAuteur__icontains=query))
     title = "Résultats pour la recherche  : %s"%query
     context = {
         'livres': livres,
@@ -167,6 +194,84 @@ def infos_perso(self):
         cursor.execute("SELECT * FROM polls_Client where id=%s", [self.id])
         row = cursor.fetchone()
     return row
+
+def montant_du(self):  #Calcul du montant dû par le client
+    with connection.cursor() as cursor :
+        cursor.execute("SELECT * FROM polls_Paiement where client_id=%s", [self.id])
+        row = cursor.fetchall()
+    montant=0
+    if len(row) != 0: #des paiements ont été effectués ou sont en cours
+        for i in range(len(row)):  #on parcourt les paiements 
+            if row[i][2]==None: #le paiement n'a pas encore été effectué
+                montant = montant + row[i][4]
+    return round(montant,2)
+
+def deadline_paiement(self):  #Calcul de la deadline 
+    with connection.cursor() as cursor :
+        cursor.execute("SELECT * FROM polls_Paiement where client_id=%s", [self.id])
+        row = cursor.fetchall()
+    deadlines=[]
+    if len(row) != 0: #des paiements ont été effectués ou sont en cours
+        for i in range(len(row)):  #on parcourt les paiements 
+            print(row[i])
+            if row[i][2]==None: #le paiement n'a pas encore été effectué
+                if (row[i][1]!=None):
+                    deadlines.append(row[i][1])
+    if deadlines : 
+        print(deadlines)
+        return min(deadlines)
+    else:
+        return
+
+def actualisation_cotisation(self):  #Actualisation du paiement de la cotisation 
+    statut=''
+    utc=pytz.UTC
+    date_du_jour = str(datetime.now(timezone.utc))
+    annee_actuelle=int(date_du_jour[0]+date_du_jour[1]+date_du_jour[2]+date_du_jour[3])
+    mois_actuel=int(date_du_jour[5]+date_du_jour[6])
+    mois=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+    jour_actuel=int(date_du_jour[8]+date_du_jour[9])
+    date_du_jour_str=str(jour_actuel)+'-'+mois[mois_actuel-1]+'-'+str(annee_actuelle)
+    date_du_jour_AAAAMMJJ = datetime.strptime(date_du_jour_str, '%d-%b-%Y').strftime('%Y-%m-%d')
+    if jour_actuel==1 and mois_actuel==1:   #on met les cotisations le 1 janvier
+        with connection.cursor() as cursor :
+            cursor.execute("SELECT * FROM polls_Client where id=%s", [self.id])
+            row = cursor.fetchall()
+            if row:
+                statut=row[0][1]
+        if statut != '':
+            if statut == "plein tarif":
+                p = Paiement(cree_le=date_du_jour_AAAAMMJJ, deadline=utc.localize(datetime(annee_actuelle, 2, 1, 0, 0)),raison="Cotisation annuelle",montant=18)
+                p.save()
+            if statut == "jeune":
+                p = Paiement(client=self,cree_le=date_du_jour_AAAAMMJJ, deadline=utc.localize(datetime(annee_actuelle, 2, 1, 0, 0)),raison="Cotisation annuelle",montant=10)
+                p.save()
+    #tous les ans, on ajoute un paiement du montant de la cotisation à tous le monde, pour la fin du mois de janvier
+    return
+
+def MAJ_paiement(self):  #mise à jour de tous les paiements de la bilbi
+    date_du_jour = datetime.now(timezone.utc)
+    with connection.cursor() as cursor :
+        cursor.execute("SELECT * FROM polls_Paiement")
+        paiements = cursor.fetchall()
+    deadline=''
+    for i in range(len(paiements)):
+        if paiements and paiements[i] and paiements[i][1]:
+            annee=str(paiements[i][1])
+            annee=int(annee[0]+annee[1]+annee[2]+annee[3])
+            mois=str(paiements[i][1])
+            mois=int(mois[5]+mois[6])
+            jour=str(paiements[i][1])
+            jour=int(jour[8]+jour[9])
+            utc=pytz.UTC
+            deadline =  utc.localize(datetime(annee, mois, jour, 0, 0))
+            if deadline+timedelta(3)>=date_du_jour:
+                prix = deadline+timedelta(3)-date_du_jour
+                prix=str(prix)
+                prix=int(prix[0]+prix[1]+'.00')
+                Paiement.objects.filter(pk=i).update(montant=prix)
+    return 
+
 
 def blacklisted_client(self):
     with connection.cursor() as cursor:
