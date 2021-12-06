@@ -17,6 +17,7 @@ def home(request):
     if request.user.is_authenticated:
         if (request.user.last_login-date_du_jour>timedelta(1)):    #si l'utilisateur s'est connecté il y a plus d'un jour, on regarde s'il ne doit pas payer la cotisation + on met à jour les paiements  
             MAJ_paiement(request.user.client)
+            MAJ_is_bad_borrower(request.user.client)
             actualisation_cotisation(request.user.client)
     return render(request, 'polls/home.html')
     
@@ -28,6 +29,7 @@ def mesinfospersos(request):
     if request.user.is_authenticated:
         if (request.user.last_login-date_du_jour>timedelta(1)):    #si l'utilisateur s'est connecté il y a plus d'un jour, on regarde s'il ne doit pas payer la cotisation + on met à jour les paiements 
             MAJ_paiement(request.user.client)
+            MAJ_is_bad_borrower(request.user.client)
             actualisation_cotisation(request.user.client)
         client = Client.objects.filter(user=request.user)
         montant = montant_du(request.user.client)
@@ -45,6 +47,7 @@ def mesreservations(request):
         if (request.user.last_login-date_du_jour>timedelta(1)):    #si l'utilisateur s'est connecté il y a plus d'un jour, on regarde s'il ne doit pas payer la cotisation + on met à jour les paiements du site 
             actualisation_cotisation(request.user.client)
             MAJ_paiement(request.user.client)
+            MAJ_is_bad_borrower(request.user.client)
         with connection.cursor() as cursor :
             cursor.execute(
                 "SELECT Livre.id, Livre.titre, Livre.nomAuteur, Livre.prenomAuteur, Emprunt.reserve_le, Emprunt.retour_max_le, Emprunt.en_retard\
@@ -268,8 +271,57 @@ def MAJ_paiement(self):  #mise à jour de tous les paiements de la bilbi
             if deadline+timedelta(3)>=date_du_jour:
                 prix = deadline+timedelta(3)-date_du_jour
                 prix=str(prix)
-                prix=int(prix[0]+prix[1]+'.00')
+                prix=prix[0]+prix[1]+'.00'
+                prix=float(prix)
                 Paiement.objects.filter(pk=i).update(montant=prix)
+    
+    #ajout d'un paiement en cas de rendu en retard 
+    with connection.cursor() as cursor :
+        cursor.execute("SELECT * FROM polls_Emprunt")
+        emprunts = cursor.fetchall()
+
+        annee=str(emprunts[0][7])
+        annee=int(annee[0]+annee[1]+annee[2]+annee[3])
+        mois=str(emprunts[0][7])
+        mois=int(mois[5]+mois[6])
+        jour=str(emprunts[0][7])
+        jour=int(jour[8]+jour[9])
+        utc=pytz.UTC
+        deadline =  utc.localize(datetime(annee, mois, jour, 0, 0))
+
+        annee_actuelle=int(date_du_jour[0]+date_du_jour[1]+date_du_jour[2]+date_du_jour[3])
+        mois_actuel=int(date_du_jour[5]+date_du_jour[6])
+        mois=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+        jour_actuel=int(date_du_jour[8]+date_du_jour[9])
+        date_du_jour_str=str(jour_actuel)+'-'+mois[mois_actuel-1]+'-'+str(annee_actuelle)
+        date_du_jour_AAAAMMJJ = datetime.strptime(date_du_jour_str, '%d-%b-%Y').strftime('%Y-%m-%d')
+        if (utc.localize(datetime(2021, 12, 1, 0, 0))+timedelta(4))==date_du_jour:   #premier jour de paiement 
+            p = Paiement(client=self,cree_le=date_du_jour_AAAAMMJJ, deadline=None,raison="Retard Emprunt",montant=1)
+            p.save()
+    return 
+
+def MAJ_is_bad_borrower(self):  #mise à jour clients bad_borrower
+    date_du_jour = datetime.now(timezone.utc)
+    annee_en_cours=str(date_du_jour)
+    annee_en_cours=int(annee_en_cours[0]+annee_en_cours[1]+annee_en_cours[2]+annee_en_cours[3])
+    utc=pytz.UTC
+    debut_annee =  utc.localize(datetime(annee_en_cours, 1, 1, 0, 0))
+    with connection.cursor() as cursor :
+        cursor.execute("SELECT * FROM polls_Emprunt where client_id=%s", [self.id])
+        emprunts = cursor.fetchall()
+    nb_en_retard=0
+    for i in range(len(emprunts)):
+        annee_emprunt = str(emprunts[i][1])
+        annee_emprunt=int(annee_emprunt[0]+annee_emprunt[1]+annee_emprunt[2]+annee_emprunt[3])
+        if emprunts[i][3]==True and annee_emprunt==annee_en_cours:  #en retard
+            nb_en_retard=nb_en_retard+1
+    if nb_en_retard>=3 and self.bad_borrower==False:
+        Client.objects.filter(pk=self.id).update(bad_borrower=True)
+        deadline=date_du_jour+timedelta(2*365)
+        Client.objects.filter(pk=self.id).update(blacklisted_until=deadline)
+    elif nb_en_retard<3 and self.bad_borrower==True:
+        Client.objects.filter(pk=self.id).update(bad_borrower=False)
+        Client.objects.filter(pk=self.id).update(blacklisted_until=None)
     return 
 
 
