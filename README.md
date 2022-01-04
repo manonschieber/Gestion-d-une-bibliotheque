@@ -1,5 +1,5 @@
 # Gestion d'une bibliothèque
-Projet de Système de bases de données. 
+Projet de Système de bases de données. Utilisation de MySQL et Python (module Django) pour le back-end, et de HTML et Bootstrap pour le front-end. 
 
 ## Contexte 
 Un groupe d’étudiants bénévoles a décidé de construire une base de données pour gérer une médiathèque. D’une part, il s’agit du gérer le fonds documentaire. D’autre part, il s’agit de gérer les clients, leurs réservations, emprunts et cotisations.
